@@ -2,6 +2,7 @@ package zinc
 
 import (
 	"encoding/json"
+	"html/template"
 )
 
 type Table struct {
@@ -12,6 +13,10 @@ type Table struct {
 func (t Table) String() string {
 	b, _ := json.Marshal(t)
 	return string(b)
+}
+
+func (t Table) Attr() template.HTMLAttr {
+	return template.HTMLAttr(t.String())
 }
 
 type TableRow struct {
