@@ -20,14 +20,15 @@ func (t Table) Attr() template.HTMLAttr {
 }
 
 type TableRow struct {
-	Actions []MenuAction `json:"actions,omitempty"`
-	URI     string       `json:"uri,omitempty"`
-	Target  string       `json:"target,omitempty"`
-	Caption string       `json:"caption,omitempty"`
-	Summary string       `json:"summary,omitempty"`
-	Icon    string       `json:"icon,omitempty"`
-	ID      string       `json:"id,omitempty"`
-	Data    []any        `json:"data,omitempty"`
+	Actions          []MenuAction `json:"actions,omitempty"`
+	ActionsPlacement string       `json:"actions-placement,omitempty"`
+	URI              string       `json:"uri,omitempty"`
+	Target           string       `json:"target,omitempty"`
+	Caption          string       `json:"caption,omitempty"`
+	Summary          string       `json:"summary,omitempty"`
+	Icon             string       `json:"icon,omitempty"`
+	ID               string       `json:"id,omitempty"`
+	Data             []any        `json:"data,omitempty"`
 }
 
 type MenuAction struct {
