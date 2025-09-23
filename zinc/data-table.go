@@ -35,3 +35,11 @@ type Action struct {
 	Target string `json:"target,omitempty"`
 	Gaid   string `json:"gaid,omitempty"`
 }
+
+type DataRequest struct {
+	Page          int64  `json:"page,omitempty"`
+	PerPage       int64  `json:"perPage,omitempty"`
+	SortColumn    string `json:"sortColumn,omitempty"`
+	SortDirection string `json:"sortDirection,omitempty"`
+	Filter        string `json:"filter,omitempty"`
+}
