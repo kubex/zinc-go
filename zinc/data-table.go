@@ -8,7 +8,6 @@ type Row struct {
 	Id      string   `json:"id"`
 	Uri     string   `json:"uri,omitempty"`
 	Target  string   `json:"target,omitempty"`
-	Gaid    string   `json:"gaid,omitempty"`
 	Cells   []Cell   `json:"cells,omitempty"`
 	Actions []Action `json:"actions,omitempty"`
 }
@@ -23,8 +22,8 @@ type Cell struct {
 	HoverContent   string `json:"hoverContent,omitempty"`
 	HoverPlacement string `json:"hoverPlacement,omitempty"`
 	ChipColor      string `json:"chipColor,omitempty"`
-	Gaid           string `json:"gaid,omitempty"`
 	SortValue      string `json:"sortValue,omitempty"`
+	Gaid           string `json:"gaid,omitempty"`
 	Uri            string `json:"uri,omitempty"`
 	Target         string `json:"target,omitempty"`
 }
