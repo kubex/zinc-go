@@ -2,6 +2,11 @@ package zinc
 
 type DataTable struct {
 	Rows []Row `json:"rows"`
+
+	PerPage    int64 `json:"perPage"`
+	Total      int64 `json:"total"`
+	Page       int64 `json:"page"`
+	TotalPages int64 `json:"totalPages"`
 }
 
 type Row struct {
