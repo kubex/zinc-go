@@ -18,7 +18,7 @@ type Row struct {
 
 type Cell struct {
 	Text           string `json:"text"`
-	Heading        string `json:"heading"`
+	Column         string `json:"column"`
 	Color          string `json:"color,omitempty"`
 	Style          string `json:"style,omitempty"`
 	IconSrc        string `json:"iconSrc,omitempty"`
