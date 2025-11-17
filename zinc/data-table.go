@@ -33,10 +33,13 @@ type Cell struct {
 }
 
 type Action struct {
-	Text   string `json:"text"`
-	Uri    string `json:"uri"`
-	Target string `json:"target,omitempty"`
-	Gaid   string `json:"gaid,omitempty"`
+	Text           string `json:"text"`
+	Uri            string `json:"uri"`
+	Target         string `json:"target,omitempty"`
+	Gaid           string `json:"gaid,omitempty"`
+	ConfirmType    string `json:"confirmType,omitempty"`
+	ConfirmTitle   string `json:"confirmTitle,omitempty"`
+	ConfirmContent string `json:"confirmContent,omitempty"`
 }
 
 type DataRequest struct {
