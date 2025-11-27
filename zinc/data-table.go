@@ -30,6 +30,7 @@ type Cell struct {
 	Gaid           string `json:"gaid,omitempty"`
 	Uri            string `json:"uri,omitempty"`
 	Target         string `json:"target,omitempty"`
+	Copyable       bool   `json:"copyable,omitempty"`
 }
 
 type Action struct {
