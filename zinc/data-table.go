@@ -1,5 +1,10 @@
 package zinc
 
+import (
+	"encoding/json"
+	"html/template"
+)
+
 type DataTable struct {
 	Rows []Row `json:"rows"`
 
@@ -49,4 +54,28 @@ type DataRequest struct {
 	SortColumn    string `json:"sortColumn,omitempty"`
 	SortDirection string `json:"sortDirection,omitempty"`
 	Filter        string `json:"filter,omitempty"`
+}
+
+type HeaderConfigs []HeaderConfig
+
+func (h HeaderConfigs) String() string {
+	b, _ := json.Marshal(h)
+	return string(b)
+}
+
+func (h HeaderConfigs) Attr() template.HTMLAttr {
+	return template.HTMLAttr(h.String())
+}
+
+type HeaderConfig struct {
+	Key   string `json:"key"`
+	Label string `json:"label"`
+
+	Required   bool `json:"required,omitempty"`
+	Default    bool `json:"default,omitempty"`
+	Sortable   bool `json:"sortable,omitempty"`
+	Filterable bool `json:"filterable,omitempty"`
+	HideHeader bool `json:"hideHeader,omitempty"`
+	HideColumn bool `json:"hideColumn,omitempty"`
+	Secondary  bool `json:"secondary,omitempty"`
 }
