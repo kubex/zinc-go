@@ -71,11 +71,11 @@ type HeaderConfig struct {
 	Key   string `json:"key"`
 	Label string `json:"label"`
 
-	Required   bool `json:"required,omitempty"`
-	Default    bool `json:"default,omitempty"`
-	Sortable   bool `json:"sortable,omitempty"`
-	Filterable bool `json:"filterable,omitempty"`
-	HideHeader bool `json:"hideHeader,omitempty"`
-	HideColumn bool `json:"hideColumn,omitempty"`
-	Secondary  bool `json:"secondary,omitempty"`
+	Required   *bool `json:"required,omitempty"`
+	Default    *bool `json:"default,omitempty"`
+	Sortable   *bool `json:"sortable,omitempty"`
+	Filterable *bool `json:"filterable,omitempty"`
+	HideHeader *bool `json:"hideHeader,omitempty"`
+	HideColumn *bool `json:"hideColumn,omitempty"`
+	Secondary  *bool `json:"secondary,omitempty"`
 }
