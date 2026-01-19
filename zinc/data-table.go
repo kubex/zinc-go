@@ -54,6 +54,7 @@ type DataRequest struct {
 	SortColumn    string `json:"sortColumn,omitempty"`
 	SortDirection string `json:"sortDirection,omitempty"`
 	Filter        string `json:"filter,omitempty"`
+	Search        string `json:"search,omitempty"`
 }
 
 type HeaderConfigs []HeaderConfig
