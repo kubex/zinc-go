@@ -3,6 +3,8 @@ package zinc
 import (
 	"encoding/json"
 	"html/template"
+	"sort"
+	"strconv"
 )
 
 type DataTable struct {
@@ -79,4 +81,47 @@ type HeaderConfig struct {
 	HideHeader *bool `json:"hideHeader,omitempty"`
 	HideColumn *bool `json:"hideColumn,omitempty"`
 	Secondary  *bool `json:"secondary,omitempty"`
+}
+
+// SortDataTable sorts dataTable rows in place based on the request's sort column and direction.
+func (dataTable DataTable) SortDataTable(req DataRequest) {
+	if req.SortColumn == "" {
+		return
+	}
+
+	sort.Slice(dataTable.Rows, func(i, j int) bool {
+		var a, b string
+		for _, cell := range dataTable.Rows[i].Cells {
+			if cell.Column == req.SortColumn {
+				a = cell.SortValue
+				if a == "" {
+					a = cell.Text
+				}
+				break
+			}
+		}
+		for _, cell := range dataTable.Rows[j].Cells {
+			if cell.Column == req.SortColumn {
+				b = cell.SortValue
+				if b == "" {
+					b = cell.Text
+				}
+				break
+			}
+		}
+
+		aNum, aErr := strconv.ParseFloat(a, 64)
+		bNum, bErr := strconv.ParseFloat(b, 64)
+		if aErr == nil && bErr == nil {
+			if req.SortDirection == "desc" {
+				return aNum > bNum
+			}
+			return aNum < bNum
+		}
+
+		if req.SortDirection == "desc" {
+			return a > b
+		}
+		return a < b
+	})
 }
