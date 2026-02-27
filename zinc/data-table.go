@@ -45,6 +45,8 @@ type Action struct {
 	Uri            string `json:"uri"`
 	Target         string `json:"target,omitempty"`
 	Gaid           string `json:"gaid,omitempty"`
+	Color          string `json:"color,omitempty"`
+	IconSrc        string `json:"iconSrc,omitempty"`
 	ConfirmType    string `json:"confirmType,omitempty"`
 	ConfirmTitle   string `json:"confirmTitle,omitempty"`
 	ConfirmContent string `json:"confirmContent,omitempty"`
