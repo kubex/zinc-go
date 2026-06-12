@@ -25,11 +25,6 @@ type AttrValuer interface {
 // falls back to the lowercased field name when no tag is set. Fields tagged
 // `json:"-"` are skipped.
 //
-// Fields are skipped when:
-//   - the field is a nil pointer
-//   - the (dereferenced) value is the zero value for its type
-//   - the value is a slice or map of length 0
-//
 // Encoding precedence per field value:
 //   - if the type implements AttrValuer, AttrValue() is called
 //   - strings, numbers, and bools render as-is
@@ -41,8 +36,8 @@ type AttrValuer interface {
 //
 // Example:
 //
-//	<data-table {{attrs $.DataTableConfig}}></data-table>
-//	// renders: <data-table method="POST" data-uri="/x" unsortable="false">
+//	<data-table {{$.DataTableConfig.Attrs}}></data-table>
+//	renders: <data-table method="POST" data-uri="/x" unsortable="false">
 func HTMLAttrs(v any) template.HTMLAttr {
 	rv := reflect.ValueOf(v)
 	for rv.Kind() == reflect.Ptr {
