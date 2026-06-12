@@ -37,7 +37,6 @@ type Cell struct {
 	HoverContent   string `json:"hoverContent,omitempty"`
 	HoverPlacement string `json:"hoverPlacement,omitempty"`
 	ChipColor      string `json:"chipColor,omitempty"`
-	ChipSize       string `json:"chipSize,omitempty"` // 'small' | 'medium' | 'large'
 	SortValue      string `json:"sortValue,omitempty"`
 	Gaid           string `json:"gaid,omitempty"`
 	Uri            string `json:"uri,omitempty"`
@@ -67,13 +66,7 @@ type DataRequest struct {
 }
 
 // DataTableConfig configures the <zn-data-table> web component. Each field
-// maps to an HTML attribute on the rendered tag - HTMLAttrs renders only the
-// fields that are set, so the zero value is a valid "use all defaults" config.
-//
-// Pointer-typed bool/string fields are tri-state: nil means "not set" (defer
-// to the component's default), while a non-nil zero (e.g. *bool to false) is
-// rendered explicitly. Plain (non-pointer) string and bool fields are simply
-// omitted when zero - there's no way to force their zero value into output.
+// maps to an HTML attribute on the rendered tag
 //
 // See https://zinc.style/components/data-table/ for visual examples and the
 // full request/response data schemas.
@@ -81,23 +74,17 @@ type DataRequest struct {
 //
 //	<zn-data-table {{$.DataTableConfig.Attrs}}></zn-data-table>
 type DataTableConfig struct {
-	// DataUri is the URL the table fetches rows from. Required unless Data
-	// is set inline. Pagination, sort, search, filter, and slot=inputs
-	// parameters are sent with every request - in the body for POST,
-	// in the query string for GET.
+	// DataUri is the URL the table fetches rows from.
 	DataUri string `json:"data-uri,omitempty"`
 
-	// Data is an inline JSON-encoded list of rows. Use instead of DataUri
-	// when the data is fixed and small enough to embed in the page.
+	// Data is an inline JSON-encoded list of rows.
 	Data string `json:"data,omitempty"`
 
 	// Method is the HTTP verb for data requests: "GET" or "POST".
 	// Component default is "POST" when empty.
 	Method string `json:"method,omitempty"`
 
-	// Headers defines the columns: each entry has a key (matched against
-	// Cell.Column in the data response), a label, and per-column flags
-	// (sortable, secondary, etc.).
+	// Headers defines the columns.
 	Headers HeaderConfigs `json:"headers,omitempty"`
 
 	// HideHeaders is a JSON array of column keys whose header text should
@@ -129,29 +116,22 @@ type DataTableConfig struct {
 	SortDirection string `json:"sort-direction,omitempty"`
 
 	// GroupBy is a column key. When set, rows are split into separate
-	// sub-tables, one per distinct value of that column. The table loads
-	// all rows up-front (per-page limit is bumped) so grouping can run
-	// client-side.
+	// sub-tables, one per distinct value of that column.
 	GroupBy string `json:"group-by,omitempty"`
 
 	// Groups is a comma-separated list of group values to display when
-	// GroupBy is set. Use "*" as a wildcard for "all groups not explicitly
-	// listed". Leave empty to auto-create one group per distinct value.
+	// GroupBy is set.
 	Groups string `json:"groups,omitempty"`
 
 	// Search is the initial search query passed to the data endpoint.
-	// Changes to the zn-data-table-search slot component update this at
-	// runtime.
+	// Changes to the zn-data-table-search slot component update this at runtime.
 	Search string `json:"search,omitempty"`
 
 	// Filter is the initial filter string passed to the data endpoint -
 	// typically a serialized query produced by zn-data-table-filter.
 	Filter string `json:"filter,omitempty"`
-	// Filters           []string      `json:"filters,omitempty"`
 
-	// Captions is the table caption / heading text. Also drives the
-	// default empty-state message ("No <caption> found") when
-	// EmptyStateCaption is not set.
+	// Captions is the table caption / heading text.
 	Captions *string `json:"captions,omitempty"`
 
 	// EmptyStateCaption is the text shown when the result set is empty
@@ -165,11 +145,8 @@ type DataTableConfig struct {
 	// Unsortable disables column sorting on the entire table.
 	Unsortable *bool `json:"unsortable,omitempty"`
 
-	// PerPageSize is the initial number of rows requested per page. Sent
-	// as `perPage` in the data request body/query string. Component
-	// default is 10 when unset. The user can override this at runtime via
-	// the rows-per-page selector in the footer, and the server's `perPage`
-	// in the response takes precedence after the first load.
+	// PerPageSize is the initial number of rows requested per page.
+	// Default is 10 when unset.
 	PerPageSize int `json:"per-page-size,omitempty"`
 
 	// HidePagination hides the pagination footer even when total > perPage.
@@ -180,22 +157,16 @@ type DataTableConfig struct {
 	HideCheckboxes *bool `json:"hide-checkboxes,omitempty"`
 
 	// Standalone renders the table without its container wrapper. Use when
-	// embedding inside another zinc component that already provides
-	// padding/borders.
+	// embedding inside another zinc component that already provides padding/borders.
 	Standalone *bool `json:"standalone,omitempty"`
 
 	// NoInitialLoad suppresses the data fetch that normally fires when
-	// the component connects. The caller must invoke refresh() (or change
-	// an attribute that triggers a reload) before any rows appear -
-	// useful when the user must submit a filter form first.
+	// the component connects.
 	NoInitialLoad *bool `json:"no-initial-load,omitempty"`
 }
 
-// Attrs renders this config as a space-separated HTML attribute set
-// (e.g. ` method="POST" data-uri="/x"`) for insertion inside a tag in a
-// template: <data-table {{$.Config.Attrs}}></data-table>.
-// Delegates to HTMLAttrs, which honours the AttrValuer interface on
-// fields (so Headers etc. control their own serialization).
+// Attrs renders this config as a space-separated HTML attribute for insertion
+// inside a tag in a template.
 func (c DataTableConfig) Attrs() template.HTMLAttr {
 	return HTMLAttrs(c)
 }
@@ -207,15 +178,10 @@ func (h HeaderConfigs) String() string {
 	return string(b)
 }
 
-// AttrValue implements AttrValuer so HTMLAttrs uses this JSON serialization
-// when rendering a Headers field instead of the default reflection path.
 func (h HeaderConfigs) AttrValue() string {
 	return h.String()
 }
 
-// Attr is kept for backward compatibility with existing callers in other
-// projects. New code should rely on AttrValue (via HTMLAttrs) or call
-// String() directly.
 func (h HeaderConfigs) Attr() template.HTMLAttr {
 	return template.HTMLAttr(h.String())
 }
@@ -280,8 +246,6 @@ func (dataTable DataTable) SortDataTable(req DataRequest) {
 	})
 }
 
-// DataTableFilter
-
 type DataTableFilterType string
 
 const (
@@ -339,13 +303,11 @@ const (
 	// (e.g. "2026-06-09T16:05:00Z").
 	DataTableFilterDateSubmitFormatIso DataTableFilterDateSubmitFormat = "iso"
 
-	// DataTableFilterDateSubmitFormatTimestamp emits a Unix timestamp in
-	// seconds since epoch.
+	// DataTableFilterDateSubmitFormatTimestamp emits a Unix timestamp in seconds since epoch.
 	DataTableFilterDateSubmitFormatTimestamp DataTableFilterDateSubmitFormat = "timestamp"
 
 	// DataTableFilterDateSubmitFormatLegacy emits whatever format the current
-	// system produces. Kept so existing backends keep working while consumers
-	// migrate to one of the formats above. Default.
+	// system produces. Default.
 	DataTableFilterDateSubmitFormatLegacy DataTableFilterDateSubmitFormat = "legacy"
 )
 
