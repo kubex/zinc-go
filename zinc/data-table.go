@@ -15,6 +15,14 @@ type DataTable struct {
 	PerPage int64 `json:"perPage"`
 	Total   int64 `json:"total"`
 	Page    int64 `json:"page"`
+
+	Error *DataTableError `json:"error,omitempty"`
+}
+
+type DataTableError struct {
+	Text  string `json:"text"`
+	Icon  string `json:"icon,omitempty"`
+	Level string `json:"level,omitempty"` // primary, error, info, success, warning, note
 }
 
 type Row struct {
@@ -131,8 +139,8 @@ type DataTableConfig struct {
 	// typically a serialized query produced by zn-data-table-filter.
 	Filter string `json:"filter,omitempty"`
 
-	// Captions is the table caption / heading text.
-	Captions *string `json:"captions,omitempty"`
+	// Caption is the table caption / heading text.
+	Caption *string `json:"caption,omitempty"`
 
 	// EmptyStateCaption is the text shown when the result set is empty
 	// and no custom empty-state slot is supplied.
