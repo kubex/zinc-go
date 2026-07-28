@@ -35,6 +35,7 @@ type Row struct {
 
 type Cell struct {
 	Text           string `json:"text"`
+	SubText        string `json:"subText,omitempty"`
 	Column         string `json:"column"`
 	Color          string `json:"color,omitempty"`
 	Style          string `json:"style,omitempty"`
@@ -50,6 +51,7 @@ type Cell struct {
 	Uri            string `json:"uri,omitempty"`
 	Target         string `json:"target,omitempty"`
 	Copyable       bool   `json:"copyable,omitempty"`
+	Title          string `json:"title,omitempty"`
 }
 
 type Action struct {
