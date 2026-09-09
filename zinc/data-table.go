@@ -67,12 +67,13 @@ type Action struct {
 }
 
 type DataRequest struct {
-	Page          int64  `json:"page,omitempty"`
-	PerPage       int64  `json:"perPage,omitempty"`
-	SortColumn    string `json:"sortColumn,omitempty"`
-	SortDirection string `json:"sortDirection,omitempty"`
-	Filter        string `json:"filter,omitempty"`
-	Search        string `json:"search,omitempty"`
+	Page          int64             `json:"page,omitempty"`
+	PerPage       int64             `json:"perPage,omitempty"`
+	SortColumn    string            `json:"sortColumn,omitempty"`
+	SortDirection string            `json:"sortDirection,omitempty"`
+	Filter        string            `json:"filter,omitempty"`
+	Search        string            `json:"search,omitempty"`
+	SearchFields  map[string]string `json:"searchFields,omitempty"`
 }
 
 // DataTableConfig configures the <zn-data-table> web component. Each field
