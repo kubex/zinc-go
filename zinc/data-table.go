@@ -3,6 +3,7 @@ package zinc
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"sort"
 	"strconv"
@@ -268,6 +269,43 @@ const (
 )
 
 type DataTableFilterOptions map[string]any
+
+// MarshalJSON emits the options as a JSON object ordered by value (the
+// display label) rather than by key, which is what the default map
+// marshaler does. The frontend renders options via Object.keys(options),
+// so this member order is the order shown in the filter dropdown. Ties
+// fall back to key order to keep output deterministic.
+func (o DataTableFilterOptions) MarshalJSON() ([]byte, error) {
+	keys := make([]string, 0, len(o))
+	for k := range o {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		a, b := fmt.Sprint(o[keys[i]]), fmt.Sprint(o[keys[j]])
+		if a == b {
+			return keys[i] < keys[j]
+		}
+		return a < b
+	})
+
+	var buf strings.Builder
+	buf.WriteByte('{')
+	for i, k := range keys {
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		kb, _ := json.Marshal(k)
+		vb, err := json.Marshal(o[k])
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(kb)
+		buf.WriteByte(':')
+		buf.Write(vb)
+	}
+	buf.WriteByte('}')
+	return []byte(buf.String()), nil
+}
 
 type DataTableFilterOperator string
 
