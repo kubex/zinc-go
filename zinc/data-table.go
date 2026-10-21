@@ -47,6 +47,7 @@ type Cell struct {
 	HoverContent   string `json:"hoverContent,omitempty"`
 	HoverPlacement string `json:"hoverPlacement,omitempty"`
 	ChipColor      string `json:"chipColor,omitempty"`
+	BadgeType      string `json:"badgeType,omitempty"`
 	SortValue      string `json:"sortValue,omitempty"`
 	Gaid           string `json:"gaid,omitempty"`
 	Uri            string `json:"uri,omitempty"`
