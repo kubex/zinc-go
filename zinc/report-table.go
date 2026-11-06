@@ -16,6 +16,11 @@ const (
 	ReportStyleBreakeven  = "breakeven"
 	ReportStyleIBreakeven = "ibreakeven"
 	ReportStyleBold       = "bold"
+	ReportStyleChange     = "change"
+	ReportStyleTargetMin  = "targetmin"
+	ReportStyleTarget     = "target"
+	ReportStyleITarget    = "itarget"
+	ReportStyleBool       = "bool"
 )
 
 // ReportTable is the response for <zn-report-table>.
@@ -49,6 +54,7 @@ type ReportColumn struct {
 	Decimals  *int     `json:"decimals,omitempty"`
 	Style     string   `json:"style,omitempty"` // ReportStyle*
 	Threshold *float64 `json:"threshold,omitempty"`
+	Min       *float64 `json:"min,omitempty"` // ReportStyleTargetMin's lower bound
 	Summable  *bool    `json:"summable,omitempty"`
 	Currency  string   `json:"currency,omitempty"`
 	Value     string   `json:"value,omitempty"`
@@ -60,14 +66,17 @@ type ReportRow struct {
 	Label  string         `json:"label"`
 	Uri    string         `json:"uri,omitempty"`
 	Target string         `json:"target,omitempty"`
+	Gaid   string         `json:"gaid,omitempty"`
 	Values map[string]any `json:"values,omitempty"`
 	// Links is keyed by column key.
 	Links map[string]ReportLink `json:"links,omitempty"`
 }
 
+// ReportLink opens Uri in the console app Gaid, else the table's own.
 type ReportLink struct {
 	Uri    string `json:"uri"`
 	Target string `json:"target,omitempty"`
+	Gaid   string `json:"gaid,omitempty"`
 }
 
 type ReportOption struct {
