@@ -167,6 +167,9 @@ type DataTableConfig struct {
 	// Unsortable disables column sorting on the entire table.
 	Unsortable *bool `json:"unsortable,omitempty"`
 
+	// NoReorder stops columns being dragged into a new order.
+	NoReorder *bool `json:"no-reorder,omitempty"`
+
 	// PerPageSize is the initial number of rows requested per page.
 	// Default is 10 when unset.
 	PerPageSize int `json:"per-page-size,omitempty"`
