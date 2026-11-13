@@ -76,6 +76,11 @@ type DataRequest struct {
 	SortDirection string `json:"sortDirection,omitempty"`
 	Filter        string `json:"filter,omitempty"`
 	Search        string `json:"search,omitempty"`
+
+	// SearchFields holds the search component's field values, with Q mirroring
+	// Search. Only sent when the table sets wrap-search-fields; otherwise those
+	// values arrive at the root of the request body.
+	SearchFields map[string]any `json:"searchFields,omitempty"`
 }
 
 // DataTableConfig configures the <zn-data-table> web component. Each field
@@ -90,7 +95,7 @@ type DataTableConfig struct {
 	// DataUri is the URL the table fetches rows from.
 	DataUri string `json:"data-uri,omitempty"`
 
-	// Data is an inline JSON-encoded list of rows.
+	// Data is an inline JSON-encoded row or list of rows.
 	Data string `json:"data,omitempty"`
 
 	// Method is the HTTP verb for data requests: "GET" or "POST".
@@ -99,6 +104,10 @@ type DataTableConfig struct {
 
 	// Headers defines the columns.
 	Headers HeaderConfigs `json:"headers,omitempty"`
+
+	// Key is the column key whose cell value identifies a selected row to the
+	// action slots. Component default "id" uses Row.Id.
+	Key string `json:"key,omitempty"`
 
 	// HideHeaders is a JSON array of column keys whose header text should
 	// be hidden while the column content stays visible (e.g. action
@@ -111,7 +120,7 @@ type DataTableConfig struct {
 
 	// WideColumn is the column key that should expand to fill remaining
 	// horizontal space. Only one column should be designated wide.
-	WideColumn string `json:"wide-column,omitempty'"`
+	WideColumn string `json:"wide-column,omitempty"`
 
 	// HideColumns is a JSON array of column keys to remove from the table
 	// entirely (unlike HideHeaders, which only hides the label).
@@ -165,13 +174,53 @@ type DataTableConfig struct {
 	// HidePagination hides the pagination footer even when total > perPage.
 	HidePagination *bool `json:"hide-pagination,omitempty"`
 
-	// HideCheckboxes disables row selection - both the per-row checkboxes
-	// and the select-all action are hidden.
+	// Deprecated: the component no longer reads this. Rows are selectable
+	// only when a delete-action, modify-action or actions slot is filled.
 	HideCheckboxes *bool `json:"hide-checkboxes,omitempty"`
 
-	// Standalone renders the table without its container wrapper. Use when
-	// embedding inside another zinc component that already provides padding/borders.
+	// HideColumnSelect hides the column picker in the table header.
+	HideColumnSelect *bool `json:"hide-column-select,omitempty"`
+
+	// HideRefresh hides the refresh button in the table header.
+	HideRefresh *bool `json:"hide-refresh,omitempty"`
+
+	// Standalone wraps the caption, header controls, rows and pagination in
+	// a zn-panel.
 	Standalone *bool `json:"standalone,omitempty"`
+
+	// TotalLabel is the unit shown with the row total by the caption:
+	// "publishers" reads "16 publishers".
+	TotalLabel string `json:"total-label,omitempty"`
+
+	// TotalLabelSingular is the unit used when the total is one. Falls back
+	// to TotalLabel.
+	TotalLabelSingular string `json:"total-label-singular,omitempty"`
+
+	// Tabs are rendered inside the table. The selected tab's value is sent
+	// with every request under TabParam.
+	Tabs []DataTableTab `json:"tabs,omitempty"`
+
+	// TabParam is the request field carrying the selected tab. Component
+	// default is "tab".
+	TabParam string `json:"tab-param,omitempty"`
+
+	// PillTabs draws the tabs as a segmented control.
+	PillTabs *bool `json:"pill-tabs,omitempty"`
+
+	// ActiveTab is the selected tab's value; the first tab when empty.
+	ActiveTab string `json:"active-tab,omitempty"`
+
+	// FilterFields makes the table render its own zn-data-table-filter in
+	// the header in place of the filter slot. Applied rules are sent as Filter.
+	FilterFields []DataTableFilterItem `json:"filter-fields,omitempty"`
+
+	// Sharable mirrors search, filter, sort, page and per-page to the URL
+	// query string and restores them on load.
+	Sharable *bool `json:"sharable,omitempty"`
+
+	// WrapSearchFields nests search-component field values under
+	// DataRequest.SearchFields instead of the request root.
+	WrapSearchFields *bool `json:"wrap-search-fields,omitempty"`
 
 	// NoInitialLoad suppresses the data fetch that normally fires when
 	// the component connects.
@@ -184,11 +233,42 @@ func (c DataTableConfig) Attrs() template.HTMLAttr {
 	return HTMLAttrs(c)
 }
 
+type DataTableTab struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+	Count any    `json:"count,omitempty"` // number or string
+}
+
 type HeaderConfigs []HeaderConfig
 
+// String emits the headers as a JSON object keyed by HeaderConfig.Key, in
+// slice order, which is the shape the component reads (DataTableConfig.Key
+// resolves against these object keys).
 func (h HeaderConfigs) String() string {
-	b, _ := json.Marshal(h)
+	b, _ := orderedJSONObject(len(h), func(i int) (string, any) { return h[i].Key, h[i] })
 	return string(b)
+}
+
+// orderedJSONObject writes n members in index order; encoding/json would sort a map's keys.
+func orderedJSONObject(n int, member func(i int) (string, any)) ([]byte, error) {
+	var buf strings.Builder
+	buf.WriteByte('{')
+	for i := range n {
+		k, v := member(i)
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		kb, _ := json.Marshal(k)
+		vb, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(kb)
+		buf.WriteByte(':')
+		buf.Write(vb)
+	}
+	buf.WriteByte('}')
+	return []byte(buf.String()), nil
 }
 
 func (h HeaderConfigs) AttrValue() string {
@@ -203,17 +283,21 @@ type HeaderConfig struct {
 	Key   string `json:"key"`
 	Label string `json:"label"`
 
-	Type           string `json:"type,omitempty"`
+	Type string `json:"type,omitempty"` // "dateTime", or a key of the component's displayTemplates
+
+	// Deprecated: the component does not read this.
 	RenderTemplate string `json:"renderTemplate,omitempty"`
-	CellTemplate   *Cell  `json:"cellTemplate,omitempty"`
-	IfEmpty        *Cell  `json:"ifEmpty,omitempty"`
-	Required       *bool  `json:"required,omitempty"`
-	Default        *bool  `json:"default,omitempty"`
-	Sortable       *bool  `json:"sortable,omitempty"`
-	Filterable     *bool  `json:"filterable,omitempty"`
-	HideHeader     *bool  `json:"hideHeader,omitempty"`
-	HideColumn     *bool  `json:"hideColumn,omitempty"`
-	Secondary      *bool  `json:"secondary,omitempty"`
+
+	Align        string `json:"align,omitempty"` // left, right, center
+	CellTemplate *Cell  `json:"cellTemplate,omitempty"`
+	IfEmpty      *Cell  `json:"ifEmpty,omitempty"`
+	Required     *bool  `json:"required,omitempty"`
+	Default      *bool  `json:"default,omitempty"`
+	Sortable     *bool  `json:"sortable,omitempty"`
+	Filterable   *bool  `json:"filterable,omitempty"`
+	HideHeader   *bool  `json:"hideHeader,omitempty"`
+	HideColumn   *bool  `json:"hideColumn,omitempty"`
+	Secondary    *bool  `json:"secondary,omitempty"`
 }
 
 // SortDataTable sorts dataTable rows in place based on the request's sort column and direction.
@@ -289,24 +373,7 @@ func (o DataTableFilterOptions) MarshalJSON() ([]byte, error) {
 		}
 		return a < b
 	})
-
-	var buf strings.Builder
-	buf.WriteByte('{')
-	for i, k := range keys {
-		if i > 0 {
-			buf.WriteByte(',')
-		}
-		kb, _ := json.Marshal(k)
-		vb, err := json.Marshal(o[k])
-		if err != nil {
-			return nil, err
-		}
-		buf.Write(kb)
-		buf.WriteByte(':')
-		buf.Write(vb)
-	}
-	buf.WriteByte('}')
-	return []byte(buf.String()), nil
+	return orderedJSONObject(len(keys), func(i int) (string, any) { return keys[i], o[keys[i]] })
 }
 
 type DataTableFilterOperator string
@@ -375,7 +442,13 @@ type DataTableFilterConfig struct {
 	Name    string                `json:"name,omitempty"`
 	Filters []DataTableFilterItem `json:"filters,omitempty"`
 	Value   string                `json:"value,omitempty"`
-	Values  []string              `json:"values,omitempty"`
+
+	// DefaultFilters is a comma-separated list of filter ids offered as empty
+	// rules when the filter opens with nothing applied.
+	DefaultFilters string `json:"default-filters,omitempty"`
+
+	// Deprecated: neither zn-data-table-filter nor zn-query-builder reads this.
+	Values []string `json:"values,omitempty"`
 }
 
 func (f DataTableFilterConfig) String() string {
